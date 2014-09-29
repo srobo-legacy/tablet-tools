@@ -8,27 +8,23 @@ def wait_for_device():
     """Block until a device has appeared in the Android Debug Bridge."""
     print("Waiting for a device… ", end="")
     sys.stdout.flush()
-    exit_code = subprocess.call(["adb", "wait-for-device"])
-    assert exit_code == 0
+    subprocess.check_call(["adb", "wait-for-device"])
     print("found!")
 
 
 def reboot(target):
     print("Rebooting to {target}.".format(target=target))
-    exit_code = subprocess.call(["adb", "reboot", target])
-    assert exit_code == 0
+    subprocess.check_call(["adb", "reboot", target])
 
 
 def recovery_wipe_data():
     print("Wiping data.")
-    exit_code = subprocess.call(["adb", "shell", "recovery", "--wipe_data"])
-    assert exit_code == 0
+    subprocess.check_call(["adb", "shell", "recovery", "--wipe_data"])
 
 
 while True:
     wait_for_device()
     reboot("recovery")
-    # wait_for_device()
-    time.sleep(30)
+    input("Press return when device is in recovery mode.")
     recovery_wipe_data()
-    input("Press return to continue.")
+    input("Press return to reset next device.")
