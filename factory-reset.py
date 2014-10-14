@@ -52,6 +52,13 @@ def extract_chromium(zip_filename="chromium.zip", apk_filename="chromium.apk"):
     print("done.")
 
 
+def install_apk(apk_filename):
+    print("Installing {}… ".format(apk_filename), end="")
+    sys.stdout.flush()
+    subprocess.check_call(["adb", "install", apk_filename])
+    print("done.")
+
+
 if __name__ == "__main__":
     start_adb_server()
     download_chromium()
@@ -61,4 +68,7 @@ if __name__ == "__main__":
         reboot("recovery")
         input("Press return when device is in recovery mode.")
         recovery_wipe_data()
+        input("Press return when USB debugging has been re-enabled.")
+        wait_for_device()
+        install_apk("chromium.apk")
         input("Press return to reset next device.")
