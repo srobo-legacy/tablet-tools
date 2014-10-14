@@ -8,6 +8,7 @@ import zipfile
 
 
 def start_adb_server():
+    """Start the ADB server."""
     subprocess.check_call(["adb", "start-server"])
 
 
@@ -20,18 +21,21 @@ def wait_for_device():
 
 
 def reboot(target):
+    """Reboot the tablet to a specific target."""
     print("Rebooting to {target}.".format(target=target))
     subprocess.check_call(["adb", "reboot", target])
 
 
 def recovery_wipe_data():
-    print("Wiping data.")
+    """Wipe the data on the tablet when in recovery mode."""
+    print("Wiping data… ", end="")
     subprocess.check_call(["adb", "shell", "recovery", "--wipe_data"])
+    print("done.")
 
 
-def download_chromium(source_url="https://storage.googleapis.com/chromium-browser-continuous/Android/296734/chrome-android.zip",
-                      destination_filename="chromium.zip"):
-    print("Downloading Chromium… ", end="")
+def download(source_url, destination_filename):
+    """Download the a file locally."""
+    print("Downloading '{}'… ".format(source_url), end="")
     sys.stdout.flush()
     if os.path.exists(destination_filename):
         print("skipped.")
@@ -42,7 +46,14 @@ def download_chromium(source_url="https://storage.googleapis.com/chromium-browse
         print("done.")
 
 
+def download_chromium():
+    """Download Chromium."""
+    donwload("https://storage.googleapis.com/chromium-browser-continuous/Android/296734/chrome-android.zip",
+             "chromium.zip")
+
+
 def extract_chromium(zip_filename="chromium.zip", apk_filename="chromium.apk"):
+    """Extract the Chromium zip file and pull out of the 'ChromeShell' APK."""
     print("Extracting Chromium… ", end="")
     sys.stdout.flush()
     with zipfile.ZipFile(zip_filename) as file:
@@ -53,6 +64,7 @@ def extract_chromium(zip_filename="chromium.zip", apk_filename="chromium.apk"):
 
 
 def install_apk(apk_filename):
+    """Install an APK onto a tablet."""
     print("Installing '{}'… ".format(apk_filename), end="")
     sys.stdout.flush()
     subprocess.check_call(["adb", "install", apk_filename])
@@ -60,6 +72,7 @@ def install_apk(apk_filename):
 
 
 def write_wifi_file(filename="wifi"):
+    """Generate and write a WiFi configuration file for the tablet."""
     print("Writing WiFi file… ", end="")
     ssid = input("WiFi SSID: ")
     password = input("WiFi Password: ")
@@ -72,6 +85,7 @@ def write_wifi_file(filename="wifi"):
 
 
 def push_file_to_tablet(local, remote):
+    """Push a file to the tablet."""
     print("Pushing '{}' to the tablet… ", end="")
     subprocess.check_call(["adb", "push", local, remote])
 
