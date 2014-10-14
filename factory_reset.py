@@ -53,10 +53,27 @@ def extract_chromium(zip_filename="chromium.zip", apk_filename="chromium.apk"):
 
 
 def install_apk(apk_filename):
-    print("Installing {}… ".format(apk_filename), end="")
+    print("Installing '{}'… ".format(apk_filename), end="")
     sys.stdout.flush()
     subprocess.check_call(["adb", "install", apk_filename])
     print("done.")
+
+
+def write_wifi_file(filename="wifi"):
+    print("Writing WiFi file… ", end="")
+    ssid = input("WiFi SSID: ")
+    password = input("WiFi Password: ")
+    with open(filename, "w") as file:
+        file.write(ssid)
+        file.write("\n")
+        file.write(password)
+        file.write("\n")
+    print("done.")
+
+
+def push_file_to_tablet(local, remote):
+    print("Pushing '{}' to the tablet… ", end="")
+    subprocess.check_call(["adb", "push", local, remote])
 
 
 if __name__ == "__main__":
@@ -71,4 +88,8 @@ if __name__ == "__main__":
         input("Press return when USB debugging has been re-enabled.")
         wait_for_device()
         install_apk("chromium.apk")
+        install_apk("app/build/outputs/apk/app-debug.apk")
+        write_wifi_file()
+        push_file_to_tablet("wifi", "/sdcard/wifi")
+        os.remove("wifi")
         input("Press return to reset next device.")
