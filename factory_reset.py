@@ -48,7 +48,7 @@ def download(source_url, destination_filename):
 
 def download_chromium():
     """Download Chromium."""
-    donwload("https://storage.googleapis.com/chromium-browser-continuous/Android/296734/chrome-android.zip",
+    download("https://storage.googleapis.com/chromium-browser-continuous/Android/296734/chrome-android.zip",
              "chromium.zip")
 
 
