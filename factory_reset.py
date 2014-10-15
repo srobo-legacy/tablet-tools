@@ -73,11 +73,11 @@ def install_apk(apk_filename):
 
 def write_wifi_file(filename="wifi"):
     """Generate and write a WiFi configuration file for the tablet."""
-    ssid = input("WiFi SSID: ")
+    tla = input("TLA: ")
     password = input("WiFi Password: ")
     print("Writing WiFi file… ", end="")
     with open(filename, "w") as file:
-        file.write(ssid)
+        file.write("robot-{}".format(tla.upper()))
         file.write("\n")
         file.write(password)
         file.write("\n")
@@ -88,6 +88,7 @@ def push_file_to_tablet(local, remote):
     """Push a file to the tablet."""
     print("Pushing '{}' to the tablet… ".format(local), end="")
     subprocess.check_call(["adb", "push", local, remote])
+    print("done.")
 
 
 if __name__ == "__main__":
@@ -97,10 +98,12 @@ if __name__ == "__main__":
     while True:
         wait_for_device()
         reboot("recovery")
+        time.sleep(15)
         input("Press return when device is in recovery mode.")
-        time.sleep(5) # to be sure
+        time.sleep(5) # to be sure, you need to wait until it's on USB
         recovery_wipe_data()
-        input("Press return when USB debugging has been re-enabled.")
+        time.sleep(10)
+        print("!!! Now re-enable USB debugging on the tablet. !!!")
         wait_for_device()
         install_apk("chromium.apk")
         install_apk("../app/app/build/outputs/apk/app-debug.apk")
