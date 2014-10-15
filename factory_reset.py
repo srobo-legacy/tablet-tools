@@ -67,15 +67,15 @@ def install_apk(apk_filename):
     """Install an APK onto a tablet."""
     print("Installing '{}'… ".format(apk_filename), end="")
     sys.stdout.flush()
-    subprocess.check_call(["adb", "install", apk_filename])
+    subprocess.check_call(["adb", "install", "-r", apk_filename])
     print("done.")
 
 
 def write_wifi_file(filename="wifi"):
     """Generate and write a WiFi configuration file for the tablet."""
-    print("Writing WiFi file… ", end="")
     ssid = input("WiFi SSID: ")
     password = input("WiFi Password: ")
+    print("Writing WiFi file… ", end="")
     with open(filename, "w") as file:
         file.write(ssid)
         file.write("\n")
@@ -86,7 +86,7 @@ def write_wifi_file(filename="wifi"):
 
 def push_file_to_tablet(local, remote):
     """Push a file to the tablet."""
-    print("Pushing '{}' to the tablet… ", end="")
+    print("Pushing '{}' to the tablet… ".format(local), end="")
     subprocess.check_call(["adb", "push", local, remote])
 
 
@@ -98,11 +98,12 @@ if __name__ == "__main__":
         wait_for_device()
         reboot("recovery")
         input("Press return when device is in recovery mode.")
+        time.sleep(5) # to be sure
         recovery_wipe_data()
         input("Press return when USB debugging has been re-enabled.")
         wait_for_device()
         install_apk("chromium.apk")
-        install_apk("app/build/outputs/apk/app-debug.apk")
+        install_apk("../app/app/build/outputs/apk/app-debug.apk")
         write_wifi_file()
         push_file_to_tablet("wifi", "/sdcard/wifi")
         os.remove("wifi")
