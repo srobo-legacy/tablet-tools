@@ -110,4 +110,6 @@ if __name__ == "__main__":
         write_wifi_file()
         push_file_to_tablet("wifi", "/sdcard/wifi")
         os.remove("wifi")
+        print("!!! Now install Student Robotics app to the homescreen. !!!")
+        print("!!! Now run the Student Robotics app. !!!")
         input("Press return to reset next device.")
