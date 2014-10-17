@@ -106,7 +106,7 @@ if __name__ == "__main__":
         print("!!! Now re-enable USB debugging on the tablet. !!!")
         wait_for_device()
         install_apk("chromium.apk")
-        install_apk("../app/app/build/outputs/apk/app-debug.apk")
+        install_apk("studentrobotics.apk")
         write_wifi_file()
         push_file_to_tablet("wifi", "/sdcard/wifi")
         os.remove("wifi")
