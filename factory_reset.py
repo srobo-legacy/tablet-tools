@@ -100,7 +100,7 @@ if __name__ == "__main__":
         reboot("recovery")
         time.sleep(15)
         input("Press return when device is in recovery mode.")
-        time.sleep(5) # to be sure, you need to wait until it's on USB
+        time.sleep(15) # to be sure, you need to wait until it's on USB
         recovery_wipe_data()
         time.sleep(10)
         print("!!! Now re-enable USB debugging on the tablet. !!!")
