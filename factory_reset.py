@@ -5,6 +5,7 @@ import subprocess
 import sys
 import time
 import urllib.request
+import yaml
 import zipfile
 
 
@@ -75,6 +76,7 @@ def install_apk(apk_filename):
 def push_file_to_tablet(local, remote):
     """Push a file to the tablet."""
     print("Pushing '{}' to the tablet… ".format(local), end="")
+    sys.stdout.flush()
     subprocess.check_call(["adb", "push", local, remote])
     print("done.")
 
@@ -82,6 +84,7 @@ def push_file_to_tablet(local, remote):
 def write_wifi_file(ssid, password):
     """Generate and write a WiFi configuration file for the tablet."""
     print("Writing WiFi file… ", end="")
+    sys.stdout.flush()
     with open("wifi", "w") as file:
         file.write(ssid)
         file.write("\n")
@@ -94,6 +97,7 @@ def write_wifi_file(ssid, password):
 
 def write_tla_file(tla):
     print("Writing TLA file… ", end="")
+    sys.stdout.flush()
     with open("tla", "w") as file:
         file.write(tla)
         file.write("\n")
@@ -104,6 +108,7 @@ def write_tla_file(tla):
 
 def write_part_code_file(part_code):
     print("Writing Part Code file… ", end="")
+    sys.stdout.flush()
     with open("part_code", "w") as file:
         file.write(part_code)
         file.write("\n")
@@ -112,31 +117,46 @@ def write_part_code_file(part_code):
     os.remove("part_code")
 
 
-def store_mac_address():
-    print("Writing MAC address file… ", end="")
-    subprocess.check_call(["adb", "shell", "cat",
-                           "/sys/class/net/wlan0/address", ">",
-                           "/sdcard/mac_address"])
+def save_table_info_file(tla, serial_number, part_code):
+    print("Saving information about the tablet… ", end="")
+    sys.stdout.flush()
+    mac_address = subprocess.check_output(["adb", "shell", "cat",
+                                           "/sys/class/net/wlan0/address"])
+    mac_address = str(mac_address.strip(), "utf-8")
+    with open("tablet-{}.yaml".format(tla.upper()), "w") as fd:
+        fd.write("serial_number: {}\n".format(serial_number))
+        fd.write("mac_address: {}\n".format(mac_address))
+        fd.write("part_code: {}\n".format(part_code))
     print("done.")
 
 
 if __name__ == "__main__":
     serial_number = sys.argv[1]
     tla = sys.argv[2]
-    wifi_password = sys.argv[3]
-    part_code = sys.argv[4]
 
-    #os.environ["ANDROID_SERIAL"] = serial_number
+    with open("wifi.yaml") as fd:
+        wifi_password = yaml.safe_load(fd.read())[tla]
+
+    print("Using {} as the WiFi password.".format(wifi_password))
+    part_code = sys.argv[3]
+
+    os.environ["ANDROID_SERIAL"] = serial_number
 
     start_adb_server()
     download_chromium()
     extract_chromium()
     wait_for_device()
     reboot("recovery")
-    time.sleep(15)
-    input("Press return when device is in recovery mode.")
-    time.sleep(15) # to be sure, you need to wait until it's on USB
+    time.sleep(80)
+
+    # for some unknown reason the tablets reset to a serial number of this
+    os.environ["ANDROID_SERIAL"] = "0123456789ABCDEF"
+
     recovery_wipe_data()
+
+    # and back we go
+    os.environ["ANDROID_SERIAL"] = serial_number
+
     time.sleep(10)
     print("!!! Now re-enable USB debugging on the tablet. !!!")
     wait_for_device()
@@ -148,5 +168,5 @@ if __name__ == "__main__":
     print("!!! Now install Student Robotics app to the homescreen. !!!")
     print("!!! Now run the Student Robotics app. !!!")
     input("Press return when done.")
-    store_mac_address()
+    save_table_info_file(tla, serial_number, part_code)
     print("DONE!")
