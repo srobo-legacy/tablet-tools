@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+import os
 import os.path
 import subprocess
 import sys
@@ -71,19 +72,6 @@ def install_apk(apk_filename):
     print("done.")
 
 
-def write_wifi_file(filename="wifi"):
-    """Generate and write a WiFi configuration file for the tablet."""
-    tla = input("TLA: ")
-    password = input("WiFi Password: ")
-    print("Writing WiFi file… ", end="")
-    with open(filename, "w") as file:
-        file.write("robot-{}".format(tla.upper()))
-        file.write("\n")
-        file.write(password)
-        file.write("\n")
-    print("done.")
-
-
 def push_file_to_tablet(local, remote):
     """Push a file to the tablet."""
     print("Pushing '{}' to the tablet… ".format(local), end="")
@@ -91,25 +79,74 @@ def push_file_to_tablet(local, remote):
     print("done.")
 
 
+def write_wifi_file(ssid, password):
+    """Generate and write a WiFi configuration file for the tablet."""
+    print("Writing WiFi file… ", end="")
+    with open("wifi", "w") as file:
+        file.write(ssid)
+        file.write("\n")
+        file.write(password)
+        file.write("\n")
+    print("done.")
+    push_file_to_tablet("wifi", "/sdcard/wifi")
+    os.remove("wifi")
+
+
+def write_tla_file(tla):
+    print("Writing TLA file… ", end="")
+    with open("tla", "w") as file:
+        file.write(tla)
+        file.write("\n")
+    print("done.")
+    push_file_to_tablet("tla", "/sdcard/tla")
+    os.remove("tla")
+
+
+def write_part_code_file(part_code):
+    print("Writing Part Code file… ", end="")
+    with open("part_code", "w") as file:
+        file.write(part_code)
+        file.write("\n")
+    print("done.")
+    push_file_to_tablet("part_code", "/sdcard/part_code")
+    os.remove("part_code")
+
+
+def store_mac_address():
+    print("Writing MAC address file… ", end="")
+    subprocess.check_call(["adb", "shell", "cat",
+                           "/sys/class/net/wlan0/address", ">",
+                           "/sdcard/mac_address"])
+    print("done.")
+
+
 if __name__ == "__main__":
+    serial_number = sys.argv[1]
+    tla = sys.argv[2]
+    wifi_password = sys.argv[3]
+    part_code = sys.argv[4]
+
+    #os.environ["ANDROID_SERIAL"] = serial_number
+
     start_adb_server()
     download_chromium()
     extract_chromium()
-    while True:
-        wait_for_device()
-        reboot("recovery")
-        time.sleep(15)
-        input("Press return when device is in recovery mode.")
-        time.sleep(15) # to be sure, you need to wait until it's on USB
-        recovery_wipe_data()
-        time.sleep(10)
-        print("!!! Now re-enable USB debugging on the tablet. !!!")
-        wait_for_device()
-        install_apk("chromium.apk")
-        install_apk("../app/app/build/outputs/apk/app-debug.apk")
-        write_wifi_file()
-        push_file_to_tablet("wifi", "/sdcard/wifi")
-        os.remove("wifi")
-        print("!!! Now install Student Robotics app to the homescreen. !!!")
-        print("!!! Now run the Student Robotics app. !!!")
-        input("Press return to reset next device.")
+    wait_for_device()
+    reboot("recovery")
+    time.sleep(15)
+    input("Press return when device is in recovery mode.")
+    time.sleep(15) # to be sure, you need to wait until it's on USB
+    recovery_wipe_data()
+    time.sleep(10)
+    print("!!! Now re-enable USB debugging on the tablet. !!!")
+    wait_for_device()
+    install_apk("chromium.apk")
+    install_apk("../app/app/build/outputs/apk/app-debug.apk")
+    write_wifi_file("robot-{}".format(tla.upper()), wifi_password)
+    write_tla_file(tla)
+    write_part_code_file(part_code)
+    print("!!! Now install Student Robotics app to the homescreen. !!!")
+    print("!!! Now run the Student Robotics app. !!!")
+    input("Press return when done.")
+    store_mac_address()
+    print("DONE!")
