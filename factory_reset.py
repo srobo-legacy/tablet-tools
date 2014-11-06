@@ -1,12 +1,14 @@
 #!/usr/bin/env python3
+import argparse
 import os
 import os.path
 import subprocess
 import sys
 import time
 import urllib.request
-import yaml
 import zipfile
+
+import yaml
 
 
 def start_adb_server():
@@ -130,15 +132,28 @@ def save_table_info_file(tla, serial_number, part_code):
     print("done.")
 
 
-if __name__ == "__main__":
-    serial_number = sys.argv[1]
-    tla = sys.argv[2]
+def create_argument_parser():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("serial_number", help="Serial number of the tablet.")
+    parser.add_argument("tla", help="TLA of the team getting the tablet.")
+    parser.add_argument("part_code", help="Part code of the tablet.")
+    parser.add_argument("--wifi_file", default="wifi.yaml",
+                        help="Location of file containing WiFi keys (default" \
+                             " to wifi.yaml).")
+    return parser
 
-    with open("wifi.yaml") as fd:
+
+if __name__ == "__main__":
+    args = create_argument_parser().parse_args()
+
+    serial_number = args.serial_number
+    tla = args.tla
+
+    with open(args.wifi_file) as fd:
         wifi_password = yaml.safe_load(fd.read())[tla]
 
     print("Using {} as the WiFi password.".format(wifi_password))
-    part_code = sys.argv[3]
+    part_code = args.part_code
 
     os.environ["ANDROID_SERIAL"] = serial_number
 
