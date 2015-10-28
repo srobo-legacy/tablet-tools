@@ -52,8 +52,8 @@ def download(source_url, destination_filename):
 
 def download_chromium():
     """Download Chromium."""
-    download("https://storage.googleapis.com/chromium-browser-continuous/Android/296734/chrome-android.zip",
-             "chromium.zip")
+    download("https://storage.googleapis.com/chromium-browser-continuous/"
+             "Android/296734/chrome-android.zip", "chromium.zip")
 
 
 def extract_chromium(zip_filename="chromium.zip", apk_filename="chromium.apk"):
@@ -138,13 +138,25 @@ def create_argument_parser():
     parser.add_argument("tla", help="TLA of the team getting the tablet.")
     parser.add_argument("part_code", help="Part code of the tablet.")
     parser.add_argument("--wifi_file", default="wifi.yaml",
-                        help="Location of file containing WiFi keys (default" \
+                        help="Location of file containing WiFi keys (default"
                              " to wifi.yaml).")
-    parser.add_argument("--apk", default="app-debug.apk", help="SR app to install on the tablets. If none given, app-debug.apk is used.")
+    parser.add_argument("--apk", default="app-debug.apk",
+                        help="SR app to install on the tablets. If none "
+                        "given, app-debug.apk is used.")
     return parser
 
 
-if __name__ == "__main__":
+def interruptable_sleep(duration):
+    print('Sleeping for {}s. Although you may skip this by pressing Ctrl+C.'
+          .format(duration))
+
+    try:
+        time.sleep(duration)
+    except KeyboardInterrupt:
+        print('Interrupted.')
+
+
+if __name__ == '__main__':
     args = create_argument_parser().parse_args()
 
     serial_number = args.serial_number
@@ -155,25 +167,25 @@ if __name__ == "__main__":
 
     app_apk = args.apk
 
-    print("Using {} as the WiFi password.".format(wifi_password))
+    print('Using {} as the WiFi password.'.format(wifi_password))
     part_code = args.part_code
 
-    os.environ["ANDROID_SERIAL"] = serial_number
+    os.environ['ANDROID_SERIAL'] = serial_number
 
     start_adb_server()
     download_chromium()
     extract_chromium()
     wait_for_device()
     reboot("recovery")
-    time.sleep(80)
+    interruptable_sleep(80)
 
     # for some unknown reason the tablets reset to a serial number of this
-    os.environ["ANDROID_SERIAL"] = "0123456789ABCDEF"
+    os.environ['ANDROID_SERIAL'] = '0123456789ABCDEF'
 
     recovery_wipe_data()
 
     # and back we go
-    os.environ["ANDROID_SERIAL"] = serial_number
+    os.environ['ANDROID_SERIAL'] = serial_number
 
     time.sleep(10)
     print("!!! Now re-enable USB debugging on the tablet. !!!")
