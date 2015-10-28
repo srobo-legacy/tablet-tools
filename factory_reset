@@ -140,6 +140,7 @@ def create_argument_parser():
     parser.add_argument("--wifi_file", default="wifi.yaml",
                         help="Location of file containing WiFi keys (default" \
                              " to wifi.yaml).")
+    parser.add_argument("--apk", default="app-debug.apk", help="SR app to install on the tablets. If none given, app-debug.apk is used.")
     return parser
 
 
@@ -151,6 +152,8 @@ if __name__ == "__main__":
 
     with open(args.wifi_file) as fd:
         wifi_password = yaml.safe_load(fd.read())[tla]
+
+    app_apk = args.apk
 
     print("Using {} as the WiFi password.".format(wifi_password))
     part_code = args.part_code
@@ -176,7 +179,7 @@ if __name__ == "__main__":
     print("!!! Now re-enable USB debugging on the tablet. !!!")
     wait_for_device()
     install_apk("chromium.apk")
-    install_apk("../app/app/build/outputs/apk/app-debug.apk")
+    install_apk(app_apk)
     write_wifi_file("robot-{}".format(tla.upper()), wifi_password)
     write_tla_file(tla)
     write_part_code_file(part_code)
