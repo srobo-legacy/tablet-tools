@@ -8,7 +8,7 @@ import time
 import urllib.request
 import zipfile
 
-import yaml
+#import yaml
 
 
 def start_adb_server():
@@ -134,9 +134,9 @@ def save_table_info_file(tla, serial_number, part_code):
 
 def create_argument_parser():
     parser = argparse.ArgumentParser()
-    parser.add_argument("serial_number", help="Serial number of the tablet.")
-    parser.add_argument("tla", help="TLA of the team getting the tablet.")
-    parser.add_argument("part_code", help="Part code of the tablet.")
+    #parser.add_argument("serial_number", help="Serial number of the tablet.")
+    #parser.add_argument("tla", help="TLA of the team getting the tablet.")
+    #parser.add_argument("part_code", help="Part code of the tablet.")
     parser.add_argument("--wifi_file", default="wifi.yaml",
                         help="Location of file containing WiFi keys (default"
                              " to wifi.yaml).")
@@ -159,18 +159,18 @@ def interruptable_sleep(duration):
 if __name__ == '__main__':
     args = create_argument_parser().parse_args()
 
-    serial_number = args.serial_number
-    tla = args.tla
+    #serial_number = args.serial_number
+    #tla = args.tla
 
-    with open(args.wifi_file) as fd:
-        wifi_password = yaml.safe_load(fd.read())[tla]
+    #with open(args.wifi_file) as fd:
+    #    wifi_password = yaml.safe_load(fd.read())[tla]
 
     app_apk = args.apk
 
-    print('Using {} as the WiFi password.'.format(wifi_password))
-    part_code = args.part_code
+    #print('Using {} as the WiFi password.'.format(wifi_password))
+    #part_code = args.part_code
 
-    os.environ['ANDROID_SERIAL'] = serial_number
+    #os.environ['ANDROID_SERIAL'] = serial_number
 
     start_adb_server()
     download_chromium()
@@ -180,23 +180,23 @@ if __name__ == '__main__':
     interruptable_sleep(80)
 
     # for some unknown reason the tablets reset to a serial number of this
-    os.environ['ANDROID_SERIAL'] = '0123456789ABCDEF'
+    #os.environ['ANDROID_SERIAL'] = '0123456789ABCDEF'
 
     recovery_wipe_data()
 
     # and back we go
-    os.environ['ANDROID_SERIAL'] = serial_number
+    #os.environ['ANDROID_SERIAL'] = serial_number
 
     time.sleep(10)
     print("!!! Now re-enable USB debugging on the tablet. !!!")
     wait_for_device()
     install_apk("chromium.apk")
-    install_apk(app_apk)
-    write_wifi_file("robot-{}".format(tla.upper()), wifi_password)
-    write_tla_file(tla)
-    write_part_code_file(part_code)
-    print("!!! Now install Student Robotics app to the homescreen. !!!")
-    print("!!! Now run the Student Robotics app. !!!")
+    #install_apk(app_apk)
+    #write_wifi_file("robot-{}".format(tla.upper()), wifi_password)
+    #write_tla_file(tla)
+    #write_part_code_file(part_code)
+    #print("!!! Now install Student Robotics app to the homescreen. !!!")
+    #print("!!! Now run the Student Robotics app. !!!")
     input("Press return when done.")
-    save_table_info_file(tla, serial_number, part_code)
+    #save_table_info_file(tla, serial_number, part_code)
     print("DONE!")
